@@ -14,7 +14,6 @@ class Minesweeper {
         println("How many mines do you want on the field?")
         val numberOfMines = readLine()!!.toInt()
         board.fillRandom(numberOfMines)
-//        board.calcMines()
         board.printBoard()
         do {
             board.handleMarkCell()
@@ -67,7 +66,6 @@ class Board {
                 break
             }
         }
-        println(marksCoordinates.joinToString())
     }
 
     private fun isMined(coordinates: Coordinates): Boolean {
@@ -92,10 +90,7 @@ class Board {
     }
 
     private fun markAround(c: Coordinates) {
-        val neighbors = getNeighbors(c)
-        for (neighbor in neighbors) {
-            increaseCounter(neighbor)
-        }
+        getNeighbors(c).forEach { increaseCounter(it) }
     }
 
     private fun minesAround(c: Coordinates): Int {
@@ -107,14 +102,13 @@ class Board {
         if (cellValue != MINE) {
             if (cellValue == EMPTY_CELL) {
                 Field.setCell(c, '1')
-            } else {
-                setMinesCount(c, cellValue.digitValue().plus(1))
-            }
+            } else setMinesCount(c, cellValue.digitValue().plus(1))
         }
     }
 
     private fun isSafe(c: Coordinates): Boolean {
-        return (c.x >= 0 && c.x < Field.field.size) && (c.y >= 0 && c.y < Field.field.size)
+        return (c.x >= 0 && c.x < Field.field.size)
+                && (c.y >= 0 && c.y < Field.field.size)
     }
 
     fun handleMarkCell() {
@@ -124,16 +118,13 @@ class Board {
         if (isMined(c) && action == ACTION_FREE) {
             println("You stepped on a mine and failed!")
             isDead = true
-        } else {
-            resolveAction(action, c)
-        }
+        } else resolveAction(action, c)
     }
 
     private fun resolveAction(action: String, c: Coordinates) {
-        if (action == ACTION_FREE) {
-            exploreCells(c)
-        } else if (action == ACTION_MINE) {
-            markCell(c)
+        when (action) {
+            ACTION_FREE -> exploreCells(c)
+            ACTION_MINE -> markCell(c)
         }
     }
 
@@ -147,10 +138,7 @@ class Board {
             Field.setCell(cell, EXPLORED)
         } else return
 
-        val neighbors = getNeighbors(cell)
-        for (neighbor in neighbors) {
-            exploreCells(neighbor)
-        }
+        getNeighbors(cell).forEach { exploreCells(it) }
 
     }
 
@@ -173,10 +161,6 @@ class Board {
             }
         }
         return neighbors
-    }
-
-    private fun isNumber(c: Coordinates): Boolean {
-        return Field.getCell(c).isDigit()
     }
 
     private fun markCell(c: Coordinates) {
